@@ -1,9 +1,10 @@
 const express = require('express')
 const auth = require('./auth')
 const router = express.Router()
-const {authenticationJwt} = require('../middlewares/passport')
+const user = require('./user')
 
 router.use('/auth', auth)
+router.use('/profile', user)
 
 // 404
 router.use((req,res)=>{

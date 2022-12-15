@@ -1,4 +1,3 @@
-const express = require('express')
 const { hashSync, compareSync } = require('bcrypt')
 const db = require('../model/index')
 const User = db.users
@@ -11,6 +10,7 @@ class AuthController{
     async register(req,res){
         try {
             await User.create({
+                avatar : 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fvectorified.com%2Fimages%2Fno-profile-picture-icon-21.jpg&f=1&nofb=1&ipt=991238c91de9728b05df6fbbe038450316ee5cbb5f7b3ed4862c2274a6e3127f&ipo=images',
                 name : req.body.name,
                 username : req.body.username,
                 email : req.body.email,
@@ -28,17 +28,14 @@ class AuthController{
             })
         } catch (error) {
             console.log(error)
-            res.status(400).json({
-                code : 400,
-                message: 'something wrong when register a new user'
-            })
+            res.status(400).json({message:'error register user, check log'})
         }
     }
 
 // login
     async login(req,res){
         try {
-            const result = await User.findOne({
+            const user = await User.findOne({
                 where:{
                     [Op.or]:[
                         {username: req.body.username_email},
@@ -46,7 +43,7 @@ class AuthController{
                     ]
                 }
             })
-            if(!result || !compareSync(req.body.password, result.password)){
+            if(!user || !compareSync(req.body.password, user.password)){
                return res.status(402).json({
                     code : 400,
                     message: 'username/password is incorrect'
@@ -54,23 +51,24 @@ class AuthController{
             }
 
             const payload = {
-                username : result.username,
-                id : result.id
+                username : user.username,
+                id : user.id
             }
             const token = jwt.sign(payload, process.env.SECRET, {expiresIn:'1h'})
-            return res.status(200).json({
+
+            res.status(200).json({
                 code:200,
                 message:`login successfully`,
+                data : {
+                    id : user.id,
+                    email : user.email
+                },
                 token : token
             })
 
         } catch (error) {
             console.log(error)
-            res.status(400).json({
-                code : 400,
-                message: 'something wrong when login a user',
-                error:error
-            })
+            res.status(400).json({message:'error login user, check log'})
         }
     }
 
@@ -95,6 +93,7 @@ async authGoogle (accessToken, refreshToken, profile, cb) {
           cb(null,findUser);
     } catch (error) {
         console.log(error)
+        res.status(400).json({message:'error auth google user, check log'})
     }
     
   }
