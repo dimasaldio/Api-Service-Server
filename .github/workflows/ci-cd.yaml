@@ -1,0 +1,25 @@
+name: CI / CD branch development
+
+on:
+  push:
+    branches: [production]
+  pull_request:
+    branches: [production]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: 22
+          script: |
+            cd ~/app/backend-api
+            docker container rm -f backend-api 
+            git pull origin  
+            docker build -t backend-api:latest . 
+            docker container run -d --name backend-api -p 3000:3000 backend-api:latest
