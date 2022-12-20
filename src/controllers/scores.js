@@ -8,8 +8,10 @@ class scoreController{
     async createNewScore(req,res){
         try {
             const user = await User.findOne({raw:true, where:{id:req.user.id}})
+            console.log(req.user.id)
             await Score.create({
-                username: user.username
+                username: user.username,
+                userId : req.user.id
             })
             res.status(200).json({message:'success create new score', data:{username:user.username, win:'0', draw:'0', lose:'0'}})
         } catch (error) {
@@ -25,19 +27,13 @@ class scoreController{
             if(!user){
                 return res.status(400).json({message:'no user found'})
             }
-            const score = await Score.update({
+            await Score.update({
                 winCount: req.body.win,
                 drawCount: req.body.draw,
                 loseCount:req.body.lose
             }, {where:{userId:req.params.userID}})
             res.status(200).json({
-                message:'success update score',
-                data:{
-                    username:user.username,
-                    win: score.winCount,
-                    draw: score.drawCount,
-                    lose:score.loseCount
-                }
+                message:'success update score'
             })
         } catch (error) {
             console.log(error)
@@ -52,16 +48,19 @@ class scoreController{
            if(!score){
             return res.status(400).json({message:'no score found'})
            }
+           console.log(score)
+        //    const mapScore = score.map(x=>{
+        //     return {
+        //         username : x.username,
+        //         win : x.winCount,
+        //         draw : x.drawCount,
+        //         lose : x.loseCount
+        //     }
+        //     console.log(mapScore)
+        // })
            res.status(200).json({
             message:'success get all score',
-            data : Score.map(x=>{
-                return {
-                    username : x.username,
-                    win : x.winCount,
-                    draw : x.drawCount,
-                    lose : x.loseCount
-                }
-            })
+            data : score
            })
         } catch (error) {
             console.log(error)
