@@ -2,9 +2,11 @@ const express = require('express')
 const auth = require('./auth')
 const router = express.Router()
 const user = require('./user')
+const score = require('./score')
 
 router.use('/auth', auth)
 router.use('/profile', user)
+router.use('/score', score)
 
 // 404
 router.use((req,res)=>{
